@@ -1,0 +1,12 @@
+{
+  "test":{
+    "PORT":3000,
+    "MONGODB_URI":"mongodb://localhost:27017/Scheduler",
+    "JWT_SECRET":"hy6y768u78iegdwfeqw343"
+  },
+ "development":{
+   "PORT":3000,
+   "MONGODB_URI":"mongodb://localhost:27017/Scheduler",
+   "JWT_SECRET":"vfew54656u76uhfdcewe4354t65y"
+}
+}
