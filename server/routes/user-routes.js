@@ -26,6 +26,7 @@ router.post("/signup", (req, res) => {
           msg:
             "The email address you have entered is already associated with another account."
         });
+        //if email not in use proceed 
     user = new User(body);
     user
       .save()

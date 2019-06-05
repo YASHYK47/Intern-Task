@@ -14,6 +14,7 @@ sgMail.setApiKey(
   process.env.sendgridAPI
 );
 
+// Create a new meeting
 router.post("/addmeeting", authenticate, (req, res) => {
   var sender = req.user;
   var receivers = req.body.receivers;
@@ -29,11 +30,12 @@ router.post("/addmeeting", authenticate, (req, res) => {
   });
 });
 
+//Adding participants in meeting 
 router.post("/addparticipant", authenticate, (req, res) => {
   var meetingId = req.body.meetingId;
   var receiverId = req.body.receiverId;
   var item = { id: receiverId, status: "sent" };
-  Meeting.update({ _id: meetingId }, { $push: { item } }).then(function(err) {
+  Meeting.update({ _id: meetingId }, { $push: { item } }).then(function(err) { //updating list of participants in a meeting
     if (err) {
       return res.status(500).send({ msg: err.message });
     }
@@ -44,14 +46,15 @@ router.post("/addparticipant", authenticate, (req, res) => {
 router.get("/meeting/:id", authenticate, (req, res) => {
   Meeting.findOne({ _id: req.params.id }).then(meeting => {
     var now = new Date();
-    meeting.time = meeting.time - now.getTimezoneOffset() * 60000;
-    res.status(200).send(meeting._id.getTimestamp());
+    meeting.time = meeting.time - now.getTimezoneOffset() * 60000; //converting to local timezone
+    res.status(200).send(meeting);
     // var gmtDateTime=meeting.time;
     // var local = gmtDateTime.local().format('YYYY-MMM-DD h:mm A');
     // console.log(local);
   });
 });
 
+//Accepting invitation
 router.put("/accept/meeting/invitation", authenticate, (req, res) => {
   var meetingId = req.body.meetingId;
   Meeting.update(
@@ -64,6 +67,7 @@ router.put("/accept/meeting/invitation", authenticate, (req, res) => {
   );
 });
 
+//Rejecting Invitation
 router.put("/reject/meeting/invitation", authenticate, (req, res) => {
   var meetingId = req.body.meetingId;
   Meeting.update(
@@ -76,15 +80,16 @@ router.put("/reject/meeting/invitation", authenticate, (req, res) => {
   );
 });
 
+//Get All Previous Meetings
 router.post("/get/meetings/previous", authenticate, (req, res) => {
-  Meetings.findAll({
+  Meetings.findAll({ //finding list of meetings where user is sender or organizer
     $and: [{ "sender.id": req.user._id }, { time: { $lte: Now() } }]
   }).then(meetings => {
-    Meetings.findAll({
+    Meetings.findAll({//finding list of meetings where user is receiver
       $and: [{ "receivers.id": req.user._id }, { time: { $lte: Now() } }]
     }).then(meetings1 => {
-      meetings.concat(meetings1);
-      if (!meetings) {
+      meetings.concat(meetings1); // concatenating both results
+      if (!meetings) {  //if no meeting
         res.status(404).json({ msg: "No meetings found" });
       }
       res.status(200).send(meetings);
@@ -92,4 +97,4 @@ router.post("/get/meetings/previous", authenticate, (req, res) => {
   });
 });
 
-module.exports = router;
+module.exports = router;  //exporting Router
