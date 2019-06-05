@@ -2,11 +2,13 @@
   "test":{
     "PORT":3000,
     "MONGODB_URI":"mongodb://localhost:27017/Scheduler",
-    "JWT_SECRET":"hy6y768u78iegdwfeqw343"
+    "JWT_SECRET":"hy6y768u78iegdwfeqw343",
+    "sendgridAPI":"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"
   },
  "development":{
    "PORT":3000,
    "MONGODB_URI":"mongodb://localhost:27017/Scheduler",
-   "JWT_SECRET":"vfew54656u76uhfdcewe4354t65y"
+   "JWT_SECRET":"vfew54656u76uhfdcewe4354t65y",
+   "sendgridAPI":"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"
 }
 }

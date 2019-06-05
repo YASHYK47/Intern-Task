@@ -1,19 +1,20 @@
-const express = require("express");
+const express = require("express");     //package express
 const router = express.Router();
 const _ = require("lodash");
 const { ObjectID } = require("mongodb");
 const bcrypt = require("bcryptjs");
-const sgMail = require("@sendgrid/mail");
+const sgMail = require("@sendgrid/mail");       //sendgrid API for mailing
 
 var { mongoose } = require("./../db/mongoose.js");
 var { User } = require("./../Data/user.js");
 
-var { authenticate } = require("./../middleware/authenticate.js");
+var { authenticate } = require("./../middleware/authenticate.js");  //authenticate user
 sgMail.setApiKey(
-  "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"
+process.env.sendgridAPI
 );
 
-router.post("/signup", (req, res) => {
+//Signup route
+router.post("/signup", (req, res) => {                                             
   var body = _.pick(req.body, ["email", "name", "country", "password"]);
   var email = req.body.email;
 
@@ -59,6 +60,8 @@ router.post("/signup", (req, res) => {
   });
 });
 
+
+//Email Confirmation
 router.post("/confirmation/:token", (req, res) => {
   var token = req.params.token;
   User.findByToken(token).then(user => {
@@ -78,11 +81,6 @@ router.post("/confirmation/:token", (req, res) => {
           type: "already-verified",
           msg: "This user has already been verified."
         });
-    // user.isVerified = true;
-    // user.save(function (err) {
-    // if (err) { return res.status(500).send({ msg: err.message }); }
-    // res.status(200).send("The account has been verified. Please log in.");
-    // });
     User.update({ _id: user._id }, { isVerified: true }).then(function(err) {
       if (err) {
         return res.status(500).send({ msg: err.message });
@@ -92,6 +90,7 @@ router.post("/confirmation/:token", (req, res) => {
   });
 });
 
+// Login Route
 router.post("/login", (req, res) => {
   var email = req.body.email;
   var password = req.body.password;
@@ -105,6 +104,7 @@ router.post("/login", (req, res) => {
     }
     bcrypt.compare(password, user.password, (err, result) => {
       if (result) {
+// Generating Token if correct password
         user
           .generateAuthToken()
           .then(token => {
@@ -120,8 +120,10 @@ router.post("/login", (req, res) => {
   });
 });
 
+//Send Invitation Route
 router.post("/invite", authenticate, (req, res) => {
   var email = req.body.email;
+// composing email
   const msg = {
     to: email,
     from: "'no-reply@Scheduler.com",
@@ -133,6 +135,7 @@ router.post("/invite", authenticate, (req, res) => {
       req.headers.host +
       "/signup/"
   };
+  // Sending Email
   sgMail
     .send(msg)
     .then(result => {
@@ -143,23 +146,26 @@ router.post("/invite", authenticate, (req, res) => {
     });
 });
 
-router.get("/profile", authenticate, (req, res) => {
+// Get Profile Route
+router.get("/profile/:id", authenticate, (req, res) => {
   var id = req.params.id;
   User.findOne({ _id: id }).then(user => {
     if (!user) {
       res.status(404).json({ msg: "No user Found" });
     }
-    user1 = _.pick(user, ["email", "name", "country"]);
+    user1 = _.pick(user, ["email", "name", "country"]); //Giving only necessary Fields
     res.status(200).send(user1);
   });
 });
 
+//Get my Profile route
 router.get("/myprofile", authenticate, (req, res) => {
-  res.status(200).send(req.user);
+  res.status(200).send(req.user); 
 });
 
+// Logging-Out route
 router.delete("/logout", authenticate, (req, res) => {
-  req.user.removeToken(req.token).then(
+  req.user.removeToken(req.token).then(           //Removing Token
     () => {
       res.status(200).json({ msg: "Logged Out Successfully" });
     },
@@ -169,4 +175,4 @@ router.delete("/logout", authenticate, (req, res) => {
   );
 });
 
-module.exports = router;
+module.exports = router; //Export Router
