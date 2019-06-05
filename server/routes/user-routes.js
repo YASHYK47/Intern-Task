@@ -17,7 +17,7 @@ process.env.sendgridAPI
 router.post("/signup", (req, res) => {                                             
   var body = _.pick(req.body, ["email", "name", "country", "password"]);
   var email = req.body.email;
-
+// Checking if email is already in use
   User.findOne({ email: email }, function(err, user) {
     if (user)
       return res
@@ -48,6 +48,7 @@ router.post("/signup", (req, res) => {
             token +
             ".\n"
         };
+        // Sending Email
         sgMail
           .send(msg)
           .then(result => {
@@ -78,6 +79,7 @@ router.post("/confirmation/:token", (req, res) => {
       return res
         .status(400)
         .send({
+          // checking if the user is already verified
           type: "already-verified",
           msg: "This user has already been verified."
         });

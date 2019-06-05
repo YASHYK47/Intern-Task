@@ -11,7 +11,7 @@ var { Meeting } = require("./../Data/meeting.js");
 
 var { authenticate } = require("./../middleware/authenticate.js");
 sgMail.setApiKey(
-  "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"
+  process.env.sendgridAPI
 );
 
 router.post("/addmeeting", authenticate, (req, res) => {
